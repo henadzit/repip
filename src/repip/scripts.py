@@ -1,7 +1,9 @@
 import argparse
 import os
+import json
 import subprocess
 import sys
+import tempfile
 from typing import List
 
 
@@ -23,24 +25,64 @@ def _install(requirements_path: str):
     lock_file_path = f"{requirements_path}.lock"
     if os.path.exists(lock_file_path):
         print("Installing from lock file")
-        subprocess.call([sys.executable, "-m", "pip", "install", "-r", lock_file_path])
+
+        _install_requirements(lock_file_path)
     else:
         print("Installing from requirements file")
-        subprocess.call(
-            [sys.executable, "-m", "pip", "install", "-r", requirements_path]
-        )
+
+        packages_in_requirements = _resolve_requirements_file(requirements_path)
+        _install_requirements(requirements_path)
+        freeze_output = _freeze()
+        filtered_freeze_lines = []
+
+        # filter out packages that might have been installed by the user but
+        # are not in the requirements file
+        for line in freeze_output.splitlines():
+            cleaned_line = line.strip()
+            if cleaned_line.startswith("#") or not cleaned_line:
+                continue
+
+            if cleaned_line.split("==")[0] not in packages_in_requirements:
+                continue
+
+            filtered_freeze_lines.append(cleaned_line)
+
         with open(lock_file_path, "w") as lock_file:
-            subprocess.call([sys.executable, "-m", "pip", "freeze"], stdout=lock_file)
+            lock_file.write("\n".join(filtered_freeze_lines))
 
 
-# def _get_packages(requirements_path: str) -> List[str]:
-#     packages = []
-#     with open(requirements_path) as f:
-#         for line in f.read().splitlines():
-#             cleaned_line = line.strip()
-#             if cleaned_line.startswith("#") or not cleaned_line:
-#                 continue
+def _install_requirements(requirements_file_path: str):
+    subprocess.call(
+        [sys.executable, "-m", "pip", "install", "-r", requirements_file_path]
+    )
 
-#             packages.append(cleaned_line)
 
-#     return packages
+def _resolve_requirements_file(requirements_path: str) -> List[str]:
+    with tempfile.NamedTemporaryFile("w+") as install_report:
+        subprocess.check_call(
+            [
+                sys.executable,
+                "-m",
+                "pip",
+                "install",
+                "-r",
+                requirements_path,
+                "--dry-run",
+                "--ignore-installed",
+                "--report",
+                install_report.name,
+            ],
+            stderr=subprocess.STDOUT,
+        )
+        install_report.seek(0)
+        report = json.load(install_report)
+        return [p["metadata"]["name"] for p in report["install"]]
+
+
+def _freeze() -> str:
+    with tempfile.NamedTemporaryFile("w+") as freeze_output:
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "freeze"], stdout=freeze_output
+        )
+        freeze_output.seek(0)
+        return freeze_output.read()
