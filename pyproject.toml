@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "repip"
+name = "repipe"
 dynamic = ["version"]
 description = ''
 readme = "README.md"
@@ -27,15 +27,15 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Documentation = "https://github.com/unknown/repip#readme"
-Issues = "https://github.com/unknown/repip/issues"
-Source = "https://github.com/unknown/repip"
+Documentation = "https://github.com/unknown/repipe#readme"
+Issues = "https://github.com/unknown/repipe/issues"
+Source = "https://github.com/unknown/repipe"
 
 [project.scripts]
-repip = "repip:main"
+repipe = "repipe:main"
 
 [tool.hatch.version]
-path = "src/repip/__about__.py"
+path = "src/repipe/__about__.py"
 
 [tool.hatch.envs.default]
 dependencies = [
@@ -62,19 +62,19 @@ dependencies = [
   "mypy>=1.0.0",
 ]
 [tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/repip tests}"
+check = "mypy --install-types --non-interactive {args:src/repipe tests}"
 
 [tool.coverage.run]
-source_pkgs = ["repip", "tests"]
+source_pkgs = ["repipe", "tests"]
 branch = true
 parallel = true
 omit = [
-  "src/repip/__about__.py",
+  "src/repipe/__about__.py",
 ]
 
 [tool.coverage.paths]
-repip = ["src/repip", "*/repip/src/repip"]
-tests = ["tests", "*/repip/tests"]
+repipe = ["src/repipe", "*/repipe/src/repipe"]
+tests = ["tests", "*/repipe/tests"]
 
 [tool.coverage.report]
 exclude_lines = [
