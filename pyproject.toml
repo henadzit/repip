@@ -27,9 +27,9 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Documentation = "https://github.com/unknown/repipe#readme"
-Issues = "https://github.com/unknown/repipe/issues"
-Source = "https://github.com/unknown/repipe"
+Documentation = "https://github.com/henadzit/repipe#readme"
+Issues = "https://github.com/henadzit/repipe/issues"
+Source = "https://github.com/henadzit/repipe"
 
 [project.scripts]
 repipe = "repipe:main"
